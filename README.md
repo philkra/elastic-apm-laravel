@@ -30,7 +30,7 @@ Replace the default exception handler with overloading APM handler. The APM clas
 extending Laravel's "default" exception handler `app/Exceptions/Handler`.
 In `bootstrap/app.php` remove the default handler `App\Exceptions\Handler::class` with `PhilKra\Exceptions\Elastic\ApmAgent::class`.
 
-```
+```php
 $app->singleton(
     Illuminate\Contracts\Debug\ExceptionHandler::class,
     PhilKra\Exceptions\Elastic\ApmAgent::class
