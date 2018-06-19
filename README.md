@@ -2,6 +2,11 @@
 Laravel package of the https://github.com/philkra/elastic-apm-php-agent library, automatically handling transactions and errors/exceptions. If using `Illuminate\Support\Facades\Auth` the user Id added to the context.
 Tested with Laravel `5.6.*` and the philkra/elastic-apm-php-agent version `6.2.*`.
 
+## Install
+```
+composer require philkra/elastic-apm-laravel
+```
+
 ## Middleware
 ### Laravel
 Register as (e.g.) global middleware to be called with every request. https://laravel.com/docs/5.6/middleware#global-middleware
