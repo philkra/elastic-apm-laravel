@@ -3,6 +3,7 @@
 namespace PhilKra\ElasticApmLaravel\Middleware;
 
 use Closure;
+use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Auth;
 use PhilKra\Agent;
 
@@ -27,7 +28,7 @@ class RecordTransaction
     public function handle($request, Closure $next)
     {
         // Start Transaction
-        $transactionName = sprintf('%s /%s', $request->method(), $request->path());
+        $transactionName = $this->getTransactionName($request->route());
         $this->agent->startTransaction($transactionName);
 
         $response = $next($request);
@@ -63,5 +64,19 @@ class RecordTransaction
     public function terminate($request, $response)
     {
         $this->agent->send();
+    }
+
+    protected function getTransactionName(Route $route)
+    {
+        // fix leading /
+        if ($route->uri !== '/') {
+            $route->uri = '/'.$route->uri;
+        }
+
+        return sprintf(
+            "%s %s",
+            head($route->methods),
+            $route->uri
+        );
     }
 }
