@@ -92,20 +92,22 @@ class ElasticApmServiceProvider extends ServiceProvider
         $this->app->instance('query-log', collect([]));
     }
 
-    protected function stripVendorTraces(Collection $strackTrace): Collection
+    protected function stripVendorTraces(Collection $stackTrace): Collection
     {
-        return collect($stackTrace)->map(function ($trace) {
-            return array_set($trace, 'file', str_replace(base_path(), '', array_get($trace, 'file')));
-        })->filter(function ($trace) {
+        return collect($stackTrace)->filter(function ($trace) {
             return !starts_with(array_get($trace, 'file'), [
-                '/vendor'
+                base_path().'/vendor',
             ]);
         });
     }
 
     protected function getSourceCode(array $stackTrace): Collection
     {
-        return collect(file(base_path().array_get($stackTrace, 'file')))->filter(function ($code, $line) use ($stackTrace) {
+        if (empty(array_get($stackTrace, 'file'))) {
+            return collect([]);
+        }
+        $fileLines = file(array_get($stackTrace, 'file'));
+        return collect($fileLines)->filter(function ($code, $line) use ($stackTrace) {
             $lineStart = array_get($stackTrace, 'line') - 5;
             $lineStop = array_get($stackTrace, 'line') + 5;
             
