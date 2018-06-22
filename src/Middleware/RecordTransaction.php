@@ -57,8 +57,6 @@ class RecordTransaction
             $this->getDuration(LARAVEL_START)
         );
 
-        $this->agent->send();
-
         return $response;
     }
 
@@ -72,7 +70,7 @@ class RecordTransaction
      */
     public function terminate($request, $response)
     {
-        // $this->agent->send();
+        $this->agent->send();
     }
 
     protected function getTransactionName(Route $route)
