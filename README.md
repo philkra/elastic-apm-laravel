@@ -31,15 +31,16 @@ $app->middleware([
 
 ### Laravel
 
-Replace the default exception handler with overloading APM handler. The APM class is
-extending Laravel's "default" exception handler `app/Exceptions/Handler`.
-In `bootstrap/app.php` remove the default handler `App\Exceptions\Handler::class` with `PhilKra\ElasticApmLaravel\Exceptions\ApmAgent::class`.
+In `app/Exceptions/Handler`, add the following to the `report` method:
 
 ```php
-$app->singleton(
-    Illuminate\Contracts\Debug\ExceptionHandler::class,
-    PhilKra\ElasticApmLaravel\Exceptions\ApmAgent::class
-);
+ElasticApm::captureThrowable($exception)->send();
+```
+
+Make sure to import the facade at the top of your file:
+
+```php
+use ElasticApm;
 ```
 
 ### Lumen

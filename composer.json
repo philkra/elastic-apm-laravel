@@ -28,10 +28,20 @@
 		}
 	},
 	"autoload-dev": {
-    "psr-4": {
-        "PhilKra\\Tests\\": "tests/"
-    }
-  },
+		"psr-4": {
+			"PhilKra\\Tests\\": "tests/"
+		}
+	},
+	"extra" : {
+		"laravel": {
+			"providers": [
+				"PhilKra\\ElasticApmLaravel\\Providers\\ElasticApmServiceProvider"
+			],
+			"aliases": {
+				"ElasticApm": "PhilKra\\ElasticApmLaravel\\Facades\\ElasticApmFacade"
+			}
+		}
+	},
 	"config" : {
 		"optimize-autoloader" : true
 	},
