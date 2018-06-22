@@ -17,21 +17,23 @@ use Illuminate\Support\Facades\Auth;
 
 class ApmAgent extends Handler
 {
+    /**
+     * @var \PhilKra\Agent
+     */
+    protected $agent;
+
+    public function __construct(Agent $agent)
+    {
+        $this->agent = $agent;
+    }
 
     /**
      * @see Handler::report()
      */
     public function report(Exception $exception)
     {
-        // Bind User Context
-        $context = [];
-        if (Auth::check() === false) {
-            $context['user'] = [ 'id' => Auth::id(), ];
-        }
-
-        $agent = new Agent(config('services.apm_agent'), $context);
-        $agent->captureThrowable($exception);
-        $agent->send();
+        $this->agent->captureThrowable($exception);
+        $this->agent->send();
 
         parent::report($exception);
     }
