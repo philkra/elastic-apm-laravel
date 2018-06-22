@@ -30,11 +30,6 @@ class ElasticApmServiceProvider extends ServiceProvider
             $stackTrace = $stackTrace->map(function ($trace) {
                 $sourceCode = $this->getSourceCode($trace);
 
-                // // $vars = array_get($trace, 'args');
-                // // if (empty($vars)) {
-                // $vars = null;
-                // // }
-
                 return [
                     'function' => array_get($trace, 'function').array_get($trace, 'type').array_get($trace, 'function'),
                     'abs_path' => array_get($trace, 'file'),
@@ -44,9 +39,9 @@ class ElasticApmServiceProvider extends ServiceProvider
                     'vars' => $vars ?? null,
                     // 'module' => 'some module',
                     // 'colno' => 4,
-                    // 'pre_context' => optional($sourceCode->get('pre_context'))->toArray(),
-                    // 'context_line' => optional($sourceCode->get('context_line'))->first(),
-                    // 'post_context' => optional($sourceCode->get('post_context'))->toArray(),
+                    'pre_context' => optional($sourceCode->get('pre_context'))->toArray(),
+                    'context_line' => optional($sourceCode->get('context_line'))->first(),
+                    'post_context' => optional($sourceCode->get('post_context'))->toArray(),
                 ];
             })->values();
             
