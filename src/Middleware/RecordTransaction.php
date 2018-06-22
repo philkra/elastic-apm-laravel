@@ -48,7 +48,7 @@ class RecordTransaction
 
         $transaction->setMeta([
             'result' => $response->getStatusCode(),
-            'type'   => 'request'
+            'type'   => 'HTTP'
          ]);
 
         $transaction->setSpans(app('query-log')->toArray());
