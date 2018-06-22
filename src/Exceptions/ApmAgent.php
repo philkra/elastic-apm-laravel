@@ -1,5 +1,6 @@
 <?php
-namespace PhilKra\Exceptions\Elastic;
+
+namespace PhilKra\ElasticApmLaravel\Exceptions;
 
 /**
  *
@@ -24,16 +25,14 @@ class ApmAgent extends Handler
     {
         // Bind User Context
         $context = [];
-        if( Auth::check() === false )
-        {
+        if (Auth::check() === false) {
             $context['user'] = [ 'id' => Auth::id(), ];
         }
 
-        $agent = new Agent( config( 'services.apm_agent' ), $context );
-        $agent->captureThrowable( $exception );
+        $agent = new Agent(config('services.apm_agent'), $context);
+        $agent->captureThrowable($exception);
         $agent->send();
 
         parent::report($exception);
     }
-
 }
