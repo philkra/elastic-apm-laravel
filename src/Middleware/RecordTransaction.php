@@ -27,28 +27,37 @@ class RecordTransaction
      */
     public function handle($request, Closure $next)
     {
-        // Start Transaction
-        $transactionName = $this->getTransactionName($request->route());
-        $this->agent->startTransaction($transactionName);
+        $transaction = $this->agent->startTransaction(
+            $this->getTransactionName($request->route())
+        );
 
+        // await the outcome
         $response = $next($request);
-
-        // Stop the Transaction
-        $this->agent->stopTransaction($transactionName, [
-            'result' => $response->status(),
-            'type'   => 'demo'
-        ]);
-
-        $transaction = $this->agent->getTransaction($transactionName);
 
         $transaction->setResponse([
             'finished'     => true,
             'headers_sent' => true,
-            'status_code'  => $response->status(),
-            'headers'      => [
-                'content-type' => $response->headers->get('content-type')
-            ]
+            'status_code'  => $response->getStatusCode(),
+            'headers'      => $this->formatHeaders($response->headers->all()),
         ]);
+
+        $transaction->setUserContext([
+            'id'    => optional($request->user())->id,
+            'email' => optional($request->user())->email,
+         ]);
+
+        $transaction->setMeta([
+            'result' => $response->getStatusCode(),
+            'type'   => 'request'
+         ]);
+
+        $transaction->setSpans(app('query-log')->toArray());
+
+        $transaction->stop(
+            $this->getDuration(LARAVEL_START)
+        );
+
+        $this->agent->send();
 
         return $response;
     }
@@ -63,7 +72,7 @@ class RecordTransaction
      */
     public function terminate($request, $response)
     {
-        $this->agent->send();
+        // $this->agent->send();
     }
 
     protected function getTransactionName(Route $route)
@@ -78,5 +87,20 @@ class RecordTransaction
             head($route->methods),
             $route->uri
         );
+    }
+
+    protected function getDuration($start): float
+    {
+        $diff = microtime(true) - $start;
+        $corrected = $diff * 1000; // convert to miliseconds
+
+        return round($corrected, 3);
+    }
+
+    protected function formatHeaders(array $headers): array
+    {
+        return collect($headers)->map(function ($values, $header) {
+            return head($values);
+        })->toArray();
     }
 }
