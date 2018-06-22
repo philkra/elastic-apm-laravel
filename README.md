@@ -34,7 +34,7 @@ $app->middleware([
 In `app/Exceptions/Handler`, add the following to the `report` method:
 
 ```php
-ElasticApm::captureThrowable($exception)->send();
+ElasticApm::captureThrowable($exception);
 ```
 
 Make sure to import the facade at the top of your file:
