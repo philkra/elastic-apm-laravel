@@ -23,7 +23,7 @@ class ElasticApmServiceProvider extends ServiceProvider
         $this->app->events->listen(QueryExecuted::class, function (QueryExecuted $query) {
             $stackTrace = $this->stripVendorTraces(
                 collect(
-                    debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 50)
+                    debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, config('elastic-apm.spans.backtraceDepth', 50))
                 )
             );
 
@@ -37,8 +37,6 @@ class ElasticApmServiceProvider extends ServiceProvider
                     'lineno' => array_get($trace, 'line', 0),
                     'library_frame' => false,
                     'vars' => $vars ?? null,
-                    // 'module' => 'some module',
-                    // 'colno' => 4,
                     'pre_context' => optional($sourceCode->get('pre_context'))->toArray(),
                     'context_line' => optional($sourceCode->get('context_line'))->first(),
                     'post_context' => optional($sourceCode->get('post_context'))->toArray(),
@@ -79,7 +77,10 @@ class ElasticApmServiceProvider extends ServiceProvider
 
         $this->app->singleton(Agent::class, function ($app) {
             return new Agent(
-                config('elastic-apm.config')
+                array_merge(
+                    config('elastic-apm.app'),
+                    config('elastic-apm.server')
+                )
             );
         });
         
@@ -98,9 +99,14 @@ class ElasticApmServiceProvider extends ServiceProvider
 
     protected function getSourceCode(array $stackTrace): Collection
     {
+        if (config('elastic-apm.spans.renderSource', false) === false) {
+            return collect([]);
+        }
+
         if (empty(array_get($stackTrace, 'file'))) {
             return collect([]);
         }
+
         $fileLines = file(array_get($stackTrace, 'file'));
         return collect($fileLines)->filter(function ($code, $line) use ($stackTrace) {
             $lineStart = array_get($stackTrace, 'line') - 5;
