@@ -78,6 +78,10 @@ class ElasticApmServiceProvider extends ServiceProvider
         $this->app->singleton(Agent::class, function ($app) {
             return new Agent(
                 array_merge(
+                    [
+                        'framework' => 'Laravel',
+                        'frameworkVersion' => app()->version(),
+                    ],
                     config('elastic-apm.app'),
                     config('elastic-apm.server')
                 )
