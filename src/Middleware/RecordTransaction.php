@@ -44,12 +44,12 @@ class RecordTransaction
         $transaction->setUserContext([
             'id'    => optional($request->user())->id,
             'email' => optional($request->user())->email,
-         ]);
+        ]);
 
         $transaction->setMeta([
             'result' => $response->getStatusCode(),
             'type'   => 'HTTP'
-         ]);
+        ]);
 
         $transaction->setSpans(app('query-log')->toArray());
 
