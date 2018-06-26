@@ -20,47 +20,9 @@ class ElasticApmServiceProvider extends ServiceProvider
             __DIR__.'/../../config/elastic-apm.php' => config_path('elastic-apm.php'),
         ], 'config');
 
-        $this->app->events->listen(QueryExecuted::class, function (QueryExecuted $query) {
-            $stackTrace = $this->stripVendorTraces(
-                collect(
-                    debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, config('elastic-apm.spans.backtraceDepth', 50))
-                )
-            );
-
-            $stackTrace = $stackTrace->map(function ($trace) {
-                $sourceCode = $this->getSourceCode($trace);
-
-                return [
-                    'function' => array_get($trace, 'function').array_get($trace, 'type').array_get($trace, 'function'),
-                    'abs_path' => array_get($trace, 'file'),
-                    'filename' => basename(array_get($trace, 'file')),
-                    'lineno' => array_get($trace, 'line', 0),
-                    'library_frame' => false,
-                    'vars' => $vars ?? null,
-                    'pre_context' => optional($sourceCode->get('pre_context'))->toArray(),
-                    'context_line' => optional($sourceCode->get('context_line'))->first(),
-                    'post_context' => optional($sourceCode->get('post_context'))->toArray(),
-                ];
-            })->values();
-            
-            $query = [
-                'name' => 'Eloquent Query',
-                'type' => 'db.mysql.query',
-                'start' => round((microtime(true) - $query->time/1000 - LARAVEL_START) * 1000, 3), // calculate start time from duration
-                'duration' => round($query->time, 3),
-                'stacktrace' => $stackTrace,
-                'context' => [
-                    'db' => [
-                        'instance' => $query->connection->getDatabaseName(),
-                        'statement' => $query->sql,
-                        'type' => 'sql',
-                        'user' => $query->connection->getConfig('username'),
-                    ],
-                ],
-            ];
-        
-            app('query-log')->push($query);
-        });
+        if (config('elastic-apm.enabled') === true) {
+            $this->listenForQueries();
+        }
     }
 
     /**
@@ -131,6 +93,51 @@ class ElasticApmServiceProvider extends ServiceProvider
             }
 
             return 'trash';
+        });
+    }
+
+    protected function listenForQueries()
+    {
+        $this->app->events->listen(QueryExecuted::class, function (QueryExecuted $query) {
+            $stackTrace = $this->stripVendorTraces(
+                collect(
+                    debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, config('elastic-apm.spans.backtraceDepth', 50))
+                )
+            );
+
+            $stackTrace = $stackTrace->map(function ($trace) {
+                $sourceCode = $this->getSourceCode($trace);
+
+                return [
+                    'function' => array_get($trace, 'function').array_get($trace, 'type').array_get($trace, 'function'),
+                    'abs_path' => array_get($trace, 'file'),
+                    'filename' => basename(array_get($trace, 'file')),
+                    'lineno' => array_get($trace, 'line', 0),
+                    'library_frame' => false,
+                    'vars' => $vars ?? null,
+                    'pre_context' => optional($sourceCode->get('pre_context'))->toArray(),
+                    'context_line' => optional($sourceCode->get('context_line'))->first(),
+                    'post_context' => optional($sourceCode->get('post_context'))->toArray(),
+                ];
+            })->values();
+            
+            $query = [
+                'name' => 'Eloquent Query',
+                'type' => 'db.mysql.query',
+                'start' => round((microtime(true) - $query->time/1000 - LARAVEL_START) * 1000, 3), // calculate start time from duration
+                'duration' => round($query->time, 3),
+                'stacktrace' => $stackTrace,
+                'context' => [
+                    'db' => [
+                        'instance' => $query->connection->getDatabaseName(),
+                        'statement' => $query->sql,
+                        'type' => 'sql',
+                        'user' => $query->connection->getConfig('username'),
+                    ],
+                ],
+            ];
+        
+            app('query-log')->push($query);
         });
     }
 }
