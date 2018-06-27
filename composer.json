@@ -38,7 +38,7 @@
 				"PhilKra\\ElasticApmLaravel\\Providers\\ElasticApmServiceProvider"
 			],
 			"aliases": {
-				"ElasticApm": "PhilKra\\ElasticApmLaravel\\Facades\\ElasticApmFacade"
+				"ElasticApm": "PhilKra\\ElasticApmLaravel\\Facades\\ElasticApm"
 			}
 		}
 	},
