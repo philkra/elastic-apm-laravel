@@ -32,5 +32,13 @@ return [
 
         // Add source code to span
         'renderSource' => true,
+
+        'querylog' => [
+            // Set to false to completely disable query logging, or to 'auto' if you would like to use the threshold feature.
+            'enabled' => true,
+
+            // If a query takes longer then 200ms, we enable the query log. Make sure you set enabled = 'auto'
+            'threshold' => 200,
+        ],
     ],
 ];

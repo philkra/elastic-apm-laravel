@@ -20,7 +20,7 @@ class ElasticApmServiceProvider extends ServiceProvider
             __DIR__.'/../../config/elastic-apm.php' => config_path('elastic-apm.php'),
         ], 'config');
 
-        if (config('elastic-apm.enabled') === true) {
+        if (config('elastic-apm.enabled') === true && config('elastic-apm.spans.querylog.enabled') !== false) {
             $this->listenForQueries();
         }
     }
@@ -99,6 +99,12 @@ class ElasticApmServiceProvider extends ServiceProvider
     protected function listenForQueries()
     {
         $this->app->events->listen(QueryExecuted::class, function (QueryExecuted $query) {
+            if (config('elastic-apm.spans.querylog.enabled') === 'auto') {
+                if ($query->time < config('elastic-apm.spans.querylog.threshold')) {
+                    return;
+                }
+            }
+
             $stackTrace = $this->stripVendorTraces(
                 collect(
                     debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, config('elastic-apm.spans.backtraceDepth', 50))
