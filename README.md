@@ -15,15 +15,15 @@ Register the middleware in `app/Http/Kernel.php`
 ```php
 protected $middleware = [
     // ... more middleware
-    \PhilKra\Middleware\Elastic\ApmAgent::class,
+    \PhilKra\ElasticApmLaravel\Middleware\RecordTransaction::class,
 ];
 ```
 
 ### Lumen
-In `bootstrap/app.php` register `PhilKra\Middleware\Elastic\ApmAgent::class` as middleware:
+In `bootstrap/app.php` register `PhilKra\ElasticApmLaravel\Middleware\RecordTransaction::class` as middleware:
 ```php
 $app->middleware([
-    PhilKra\Middleware\Elastic\ApmAgent::class
+    PhilKra\ElasticApmLaravel\Middleware\RecordTransaction::class
 ]);
 ```
 
@@ -31,15 +31,17 @@ $app->middleware([
 
 ### Laravel
 
-Replace the default exception handler with overloading APM handler. The APM class is
-extending Laravel's "default" exception handler `app/Exceptions/Handler`.
-In `bootstrap/app.php` remove the default handler `App\Exceptions\Handler::class` with `PhilKra\Exceptions\Elastic\ApmAgent::class`.
+In `app/Exceptions/Handler`, add the following to the `report` method:
 
 ```php
-$app->singleton(
-    Illuminate\Contracts\Debug\ExceptionHandler::class,
-    PhilKra\Exceptions\Elastic\ApmAgent::class
-);
+ElasticApm::captureThrowable($exception);
+ElasticApm::send();
+```
+
+Make sure to import the facade at the top of your file:
+
+```php
+use ElasticApm;
 ```
 
 ### Lumen
