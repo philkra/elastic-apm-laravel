@@ -28,7 +28,7 @@ class RecordTransaction
     public function handle($request, Closure $next)
     {
         $transaction = $this->agent->startTransaction(
-            $this->getTransactionName($request->route())
+            $this->getTransactionName($request)
         );
 
         // await the outcome
@@ -73,17 +73,18 @@ class RecordTransaction
         $this->agent->send();
     }
 
-    protected function getTransactionName(Route $route)
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     */
+    protected function getTransactionName(\Illuminate\Http\Request $request)
     {
         // fix leading /
-        if ($route->uri !== '/') {
-            $route->uri = '/'.$route->uri;
-        }
+        $path = ($request->server->get('PATH_INFO') == '') ? '/' : $request->server->get('PATH_INFO');
 
         return sprintf(
             "%s %s",
-            head($route->methods),
-            $route->uri
+            $request->server->get('REQUEST_METHOD'),
+            $path
         );
     }
 
