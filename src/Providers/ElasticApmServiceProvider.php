@@ -20,7 +20,7 @@ class ElasticApmServiceProvider extends ServiceProvider
             __DIR__.'/../../config/elastic-apm.php' => config_path('elastic-apm.php'),
         ], 'config');
 
-        if (config('elastic-apm.enabled') === true && config('elastic-apm.spans.querylog.enabled') !== false) {
+        if (config('elastic-apm.active') === true && config('elastic-apm.spans.querylog.enabled') !== false) {
             $this->listenForQueries();
         }
     }
