@@ -45,6 +45,7 @@ class ElasticApmServiceProvider extends ServiceProvider
                         'frameworkVersion' => app()->version(),
                     ],
                     config('elastic-apm.app'),
+                    config('elastic-apm.env'),
                     config('elastic-apm.server')
                 )
             );

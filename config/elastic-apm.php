@@ -12,6 +12,12 @@ return [
         'appVersion'    => '',
     ],
 
+    'env' => [
+        // whitelist environment variables OR send everything
+        'env' => ['DOCUMENT_ROOT', 'REMOTE_ADDR']
+        //'env' => []
+    ],
+
     'server' => [
         // The apm-server to connect to
         'serverUrl'     => 'http://127.0.0.1:8200',
