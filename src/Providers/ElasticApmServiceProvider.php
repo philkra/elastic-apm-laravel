@@ -46,6 +46,7 @@ class ElasticApmServiceProvider extends ServiceProvider
                     ],
                     ['active' => config('elastic.active')],
                     config('elastic-apm.app'),
+                    config('elastic-apm.env'),
                     config('elastic-apm.server')
                 )
             );
