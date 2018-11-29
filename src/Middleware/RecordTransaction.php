@@ -55,7 +55,7 @@ class RecordTransaction
 
         $transaction->setSpans(app('query-log')->toArray());
 
-        if (config('elastic-apm.transactions.use_route_uri', false)) {
+        if (config('elastic-apm.transactions.use_route_uri')) {
             $transaction->setTransactionName($this->getRouteUriTransactionName($request));
         }
 
