@@ -2,10 +2,11 @@
 
 namespace PhilKra\ElasticApmLaravel\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Collection;
+use Illuminate\Support\ServiceProvider;
 use PhilKra\Agent;
+use PhilKra\ElasticApmLaravel\Contracts\VersionResolver;
 
 class ElasticApmServiceProvider extends ServiceProvider
 {
@@ -17,7 +18,7 @@ class ElasticApmServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/../../config/elastic-apm.php' => config_path('elastic-apm.php'),
+            __DIR__ . '/../../config/elastic-apm.php' => config_path('elastic-apm.php'),
         ], 'config');
 
         if (config('elastic-apm.active') === true && config('elastic-apm.spans.querylog.enabled') !== false) {
@@ -33,7 +34,7 @@ class ElasticApmServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../../config/elastic-apm.php',
+            __DIR__ . '/../../config/elastic-apm.php',
             'elastic-apm'
         );
 
@@ -45,26 +46,48 @@ class ElasticApmServiceProvider extends ServiceProvider
                         'frameworkVersion' => app()->version(),
                     ],
                     ['active' => config('elastic-apm.active')],
-                    config('elastic-apm.app'),
+                    $this->getAppConfig(),
                     config('elastic-apm.env'),
                     config('elastic-apm.server')
                 )
             );
         });
-        
+
         $this->app->alias(Agent::class, 'elastic-apm');
         $this->app->instance('query-log', collect([]));
     }
 
+    /**
+     * @return array
+     */
+    protected function getAppConfig(): array
+    {
+        $config = config('elastic-apm.app');
+
+        if ($this->app->bound(VersionResolver::class)) {
+            $config['appVersion'] = $this->app->make(VersionResolver::class)->getVersion();
+        }
+
+        return $config;
+    }
+
+    /**
+     * @param Collection $stackTrace
+     * @return Collection
+     */
     protected function stripVendorTraces(Collection $stackTrace): Collection
     {
         return collect($stackTrace)->filter(function ($trace) {
             return !starts_with(array_get($trace, 'file'), [
-                base_path().'/vendor',
+                base_path() . '/vendor',
             ]);
         });
     }
 
+    /**
+     * @param array $stackTrace
+     * @return Collection
+     */
     protected function getSourceCode(array $stackTrace): Collection
     {
         if (config('elastic-apm.spans.renderSource', false) === false) {
@@ -77,9 +100,12 @@ class ElasticApmServiceProvider extends ServiceProvider
 
         $fileLines = file(array_get($stackTrace, 'file'));
         return collect($fileLines)->filter(function ($code, $line) use ($stackTrace) {
-            $lineStart = array_get($stackTrace, 'line') - 5;
-            $lineStop = array_get($stackTrace, 'line') + 5;
-            
+            //file starts counting from 0, debug_stacktrace from 1
+            $stackTraceLine = array_get($stackTrace, 'line') - 1;
+
+            $lineStart = $stackTraceLine - 5;
+            $lineStop = $stackTraceLine + 5;
+
             return $line >= $lineStart && $line <= $lineStop;
         })->groupBy(function ($code, $line) use ($stackTrace) {
             if ($line < array_get($stackTrace, 'line')) {
@@ -117,7 +143,8 @@ class ElasticApmServiceProvider extends ServiceProvider
                 $sourceCode = $this->getSourceCode($trace);
 
                 return [
-                    'function' => array_get($trace, 'function').array_get($trace, 'type').array_get($trace, 'function'),
+                    'function' => array_get($trace, 'function') . array_get($trace, 'type') . array_get($trace,
+                            'function'),
                     'abs_path' => array_get($trace, 'file'),
                     'filename' => basename(array_get($trace, 'file')),
                     'lineno' => array_get($trace, 'line', 0),
@@ -128,11 +155,12 @@ class ElasticApmServiceProvider extends ServiceProvider
                     'post_context' => optional($sourceCode->get('post_context'))->toArray(),
                 ];
             })->values();
-            
+
             $query = [
                 'name' => 'Eloquent Query',
                 'type' => 'db.mysql.query',
-                'start' => round((microtime(true) - $query->time/1000 - LARAVEL_START) * 1000, 3), // calculate start time from duration
+                'start' => round((microtime(true) - $query->time / 1000 - LARAVEL_START) * 1000, 3),
+                // calculate start time from duration
                 'duration' => round($query->time, 3),
                 'stacktrace' => $stackTrace,
                 'context' => [
@@ -144,7 +172,7 @@ class ElasticApmServiceProvider extends ServiceProvider
                     ],
                 ],
             ];
-        
+
             app('query-log')->push($query);
         });
     }
