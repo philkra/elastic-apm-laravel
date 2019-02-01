@@ -2,7 +2,7 @@
 
 return [
     // Sets whether the apm reporting should be active or not
-    'active'        => true,
+    'active'        => env('APM_ACTIVE', true),
 
     'app' => [
         // The app name that will identify your app in Kibana / Elastic APM
@@ -35,7 +35,7 @@ return [
     'transactions' => [
 
         //This option will bundle transaction on the route name without variables
-        'use_route_uri' => false,
+        'use_route_uri' => env('APM_USE_ROUTE_URI', false),
 
     ],
 
