@@ -3,6 +3,7 @@
 namespace PhilKra\ElasticApmLaravel\Middleware;
 
 use Closure;
+use Illuminate\Support\Facades\Log;
 use PhilKra\Agent;
 
 class RecordTransaction
@@ -76,7 +77,12 @@ class RecordTransaction
      */
     public function terminate($request, $response)
     {
-        $this->agent->send();
+        try {
+            $this->agent->send();
+        }
+        catch(\Throwable $t) {
+            Log::error($t);
+        }
     }
 
     /**
