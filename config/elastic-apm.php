@@ -18,6 +18,9 @@ return [
         //'env' => []
     ],
 
+    // GuzzleHttp\Client options (http://docs.guzzlephp.org/en/stable/request-options.html#request-options)
+    'httpClient' => [],
+
     'server' => [
         // The apm-server to connect to
         'serverUrl'     => env('APM_SERVERURL', 'http://127.0.0.1:8200'),
@@ -35,7 +38,7 @@ return [
     'transactions' => [
 
         //This option will bundle transaction on the route name without variables
-        'use_route_uri' => env('APM_USE_ROUTE_URI', false),
+        'use_route_uri' => env('APM_USEROUTEURI', false),
 
     ],
 
