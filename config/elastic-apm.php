@@ -12,6 +12,10 @@ return [
         'appVersion'    => env('APM_APPVERSION', ''),
     ],
 
+    'tags' => [
+        'environment' => env('APP_ENV', 'local'),
+    ],
+
     'env' => [
         // whitelist environment variables OR send everything
         'env' => ['DOCUMENT_ROOT', 'REMOTE_ADDR']

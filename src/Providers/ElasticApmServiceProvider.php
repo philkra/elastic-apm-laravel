@@ -49,7 +49,10 @@ class ElasticApmServiceProvider extends ServiceProvider
                     $this->getAppConfig(),
                     config('elastic-apm.env'),
                     config('elastic-apm.server')
-                )
+                ),
+                [
+                    'tags' => config('elastic-apm.tags', []),
+                ]
             );
         });
 
