@@ -10,11 +10,10 @@ return [
 
         // The version of your app
         'appVersion'    => env('APM_APPVERSION', ''),
-    ],
-
-    'tags' => [
         'environment' => env('APP_ENV', 'local'),
     ],
+
+    'tags' => [],
 
     'env' => [
         // whitelist environment variables OR send everything
