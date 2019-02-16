@@ -12,14 +12,19 @@ class RecordTransaction
      * @var \PhilKra\Agent
      */
     protected $agent;
+    /**
+     * @var float
+     */
+    private $startTime;
 
     /**
      * RecordTransaction constructor.
      * @param Agent $agent
      */
-    public function __construct(Agent $agent)
+    public function __construct(Agent $agent, float $startTime)
     {
         $this->agent = $agent;
+        $this->startTime = $startTime;
     }
 
     /**
@@ -31,7 +36,9 @@ class RecordTransaction
     public function handle($request, Closure $next)
     {
         $transaction = $this->agent->startTransaction(
-            $this->getTransactionName($request)
+            $this->getTransactionName($request),
+            [],
+            $this->startTime
         );
 
         // await the outcome
@@ -60,9 +67,7 @@ class RecordTransaction
             $transaction->setTransactionName($this->getRouteUriTransactionName($request));
         }
 
-        $transaction->stop(
-            $this->getDuration(LARAVEL_START)
-        );
+        $transaction->stop();
 
         return $response;
     }

@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
 use PhilKra\Agent;
 use PhilKra\ElasticApmLaravel\Contracts\VersionResolver;
+use PhilKra\Helper\Timer;
 
 class ElasticApmServiceProvider extends ServiceProvider
 {
@@ -55,6 +56,10 @@ class ElasticApmServiceProvider extends ServiceProvider
                 )
             );
         });
+
+        $this->app->when('PhilKra\ElasticApmLaravel\Middleware\RecordTransaction')
+            ->needs('$startTime')
+            ->give($this->app['request']->server('REQUEST_TIME_FLOAT') ?? microtime(true));
 
         $this->app->alias(Agent::class, 'elastic-apm');
         $this->app->instance('query-log', collect([]));
