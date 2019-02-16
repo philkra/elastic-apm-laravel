@@ -123,19 +123,6 @@ class RecordTransaction
     }
 
     /**
-     * @param $start
-     *
-     * @return float
-     */
-    protected function getDuration($start): float
-    {
-        $diff = microtime(true) - $start;
-        $corrected = $diff * 1000; // convert to miliseconds
-
-        return round($corrected, 3);
-    }
-
-    /**
      * @param array $headers
      *
      * @return array
