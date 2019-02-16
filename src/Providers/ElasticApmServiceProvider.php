@@ -11,6 +11,11 @@ use PhilKra\Helper\Timer;
 
 class ElasticApmServiceProvider extends ServiceProvider
 {
+    /** @var float */
+    private $startTime;
+    /** @var Timer */
+    private $timer;
+
     /**
      * Bootstrap the application services.
      *
@@ -57,9 +62,10 @@ class ElasticApmServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->when('PhilKra\ElasticApmLaravel\Middleware\RecordTransaction')
-            ->needs('$startTime')
-            ->give($this->app['request']->server('REQUEST_TIME_FLOAT') ?? microtime(true));
+        $this->startTime = $this->app['request']->server('REQUEST_TIME_FLOAT') ?? microtime(true);
+        $this->timer = new Timer($this->startTime);
+
+        $this->app->instance(Timer::class, $this->timer);
 
         $this->app->alias(Agent::class, 'elastic-apm');
         $this->app->instance('query-log', collect([]));
@@ -167,7 +173,7 @@ class ElasticApmServiceProvider extends ServiceProvider
             $query = [
                 'name' => 'Eloquent Query',
                 'type' => 'db.mysql.query',
-                'start' => round((microtime(true) - $query->time / 1000 - LARAVEL_START) * 1000, 3),
+                'start' => round((microtime(true) - $query->time / 1000 - $this->startTime) * 1000, 3),
                 // calculate start time from duration
                 'duration' => round($query->time, 3),
                 'stacktrace' => $stackTrace,
