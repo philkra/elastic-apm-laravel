@@ -55,11 +55,5 @@
          "name":"George Boot",
          "email":"george@entryninja.com"
       }
-   ],
-   "repositories": [
-      {
-         "type": "vcs",
-         "url": "git@github.com:MiamiOH/elastic-apm-php-agent.git"
-      }
    ]
 }
