@@ -5,6 +5,7 @@ namespace PhilKra\ElasticApmLaravel\Middleware;
 use Closure;
 use Illuminate\Support\Facades\Log;
 use PhilKra\Agent;
+use PhilKra\Helper\Timer;
 
 class RecordTransaction
 {
@@ -12,14 +13,19 @@ class RecordTransaction
      * @var \PhilKra\Agent
      */
     protected $agent;
+    /**
+     * @var Timer
+     */
+    private $timer;
 
     /**
      * RecordTransaction constructor.
      * @param Agent $agent
      */
-    public function __construct(Agent $agent)
+    public function __construct(Agent $agent, Timer $timer)
     {
         $this->agent = $agent;
+        $this->timer = $timer;
     }
 
     /**
@@ -60,9 +66,7 @@ class RecordTransaction
             $transaction->setTransactionName($this->getRouteUriTransactionName($request));
         }
 
-        $transaction->stop(
-            $this->getDuration(LARAVEL_START)
-        );
+        $transaction->stop($this->timer->getElapsedInMilliseconds());
 
         return $response;
     }
@@ -116,19 +120,6 @@ class RecordTransaction
             $request->server->get('REQUEST_METHOD'),
             $path
         );
-    }
-
-    /**
-     * @param $start
-     *
-     * @return float
-     */
-    protected function getDuration($start): float
-    {
-        $diff = microtime(true) - $start;
-        $corrected = $diff * 1000; // convert to miliseconds
-
-        return round($corrected, 3);
     }
 
     /**

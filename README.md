@@ -68,8 +68,13 @@ The following environment variables are supported in the default configuration:
 You may also publish the `elastic-apm.php` configuration file to change additional settings:
 
 ```bash
-php artisan vendor:publish --tag=config --provider="PhilKra\ElasticApmLaravel\Providers\ElasticApmService
-Provider"
+php artisan vendor:publish --tag=config
 ```
 
 Once published, open the `config/elastic-apm.php` file and review the various settings.
+
+### Laravel Test Setup
+
+Laravel provides classes to support running unit and feature tests with PHPUnit. In most cases, you will want to explicitly disable APM during testing since it is enabled by default. Refer to the Laravel documentation for more information (https://laravel.com/docs/5.7/testing).
+
+Because the APM agent checks it's active status using a strict boolean type, you must ensure your `APM_ACTIVE` value is a boolean `false` rather than simply a falsy value. The best way to accomplish this is to create an `.env.testing` file and include `APM_ACTIVE=false`, along with any other environment settings required for your tests. This file should be safe to include in your SCM.
