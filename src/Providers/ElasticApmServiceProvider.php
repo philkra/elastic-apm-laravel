@@ -23,9 +23,17 @@ class ElasticApmServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->publishes([
-            __DIR__ . '/../../config/elastic-apm.php' => config_path('elastic-apm.php'),
-        ], 'config');
+        $source = realpath(__DIR__ . '/../../config/elastic-apm.php');
+        if (class_exists('Illuminate\Foundation\Application', false)) {
+            $this->publishes([
+                $source=> config_path('elastic-apm.php'),
+            ], 'config');
+        }
+
+        $this->mergeConfigFrom(
+            $source,
+            'elastic-apm'
+        );
 
         if (config('elastic-apm.active') === true && config('elastic-apm.spans.querylog.enabled') !== false) {
             $this->listenForQueries();
@@ -39,10 +47,6 @@ class ElasticApmServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(
-            __DIR__ . '/../../config/elastic-apm.php',
-            'elastic-apm'
-        );
 
         $this->app->singleton(Agent::class, function ($app) {
             return new Agent(
