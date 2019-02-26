@@ -66,7 +66,7 @@ class RecordTransaction
             $transaction->setTransactionName($this->getRouteUriTransactionName($request));
         }
 
-        $transaction->stop($this->timer->getElapsedInMilliseconds());
+        $transaction->stop();
 
         return $response;
     }
