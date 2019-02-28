@@ -1,0 +1,8 @@
+2019-02-27 (5.7.6) mpetrunic
+    * Fix Lumen compatibility issues
+
+2019-02-22 (5.7.5) dstepe
+    * Start CHANGELOG
+    * Replace use of LARAVEL_START constant with REQUEST_TIME_FLOAT server var
+    * Replace transaction duration with PhilKra\Helper\Timer
+    * Require philkra/elastic-apm-php-agent >=6.5.3 for Timer feature
