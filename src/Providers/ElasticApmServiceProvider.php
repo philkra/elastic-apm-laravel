@@ -15,6 +15,8 @@ class ElasticApmServiceProvider extends ServiceProvider
     private $startTime;
     /** @var Timer */
     private $timer;
+    /** @var string  */
+    private $sourceConfigPath = __DIR__ . '/../../config/elastic-apm.php';
 
     /**
      * Bootstrap the application services.
@@ -23,9 +25,11 @@ class ElasticApmServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->publishes([
-            __DIR__ . '/../../config/elastic-apm.php' => config_path('elastic-apm.php'),
-        ], 'config');
+        if (class_exists('Illuminate\Foundation\Application', false)) {
+            $this->publishes([
+                realpath($this->sourceConfigPath) => config_path('elastic-apm.php'),
+            ], 'config');
+        }
 
         if (config('elastic-apm.active') === true && config('elastic-apm.spans.querylog.enabled') !== false) {
             $this->listenForQueries();
@@ -39,8 +43,9 @@ class ElasticApmServiceProvider extends ServiceProvider
      */
     public function register()
     {
+
         $this->mergeConfigFrom(
-            __DIR__ . '/../../config/elastic-apm.php',
+            realpath($this->sourceConfigPath),
             'elastic-apm'
         );
 

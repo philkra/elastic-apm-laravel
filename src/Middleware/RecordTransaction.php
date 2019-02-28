@@ -113,7 +113,7 @@ class RecordTransaction
      */
     protected function getRouteUriTransactionName(\Illuminate\Http\Request $request): string
     {
-        $path = ($request->route()->uri === '/') ? '' : $request->route()->uri;
+        $path = ($request->path() === '/') ? '' : $request->path();
 
         return sprintf(
             "%s /%s",
