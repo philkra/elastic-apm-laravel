@@ -27,6 +27,26 @@ $app->middleware([
 ]);
 ```
 
+## Spans
+### Laravel
+A Transaction object is made available via the dependency container and can be used to start a
+new span at any point in the application. The Span will automatically add itself to the Transaction
+when it is ended.
+
+```php
+// Use any normal Laravel method of resolving the dependency
+$transaction = app(\PhilKra\ElasticApmLaravel\Apm\Transaction::class);
+
+$span = $transaction->startNewSpan('My Span', 'app.component_name');
+
+// do some stuff
+
+$span->end();
+```
+### Lumen
+
+pending
+
 ## Error/Exception Handling
 
 ### Laravel
