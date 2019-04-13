@@ -44,10 +44,10 @@ return [
 
     'spans' => [
         // Depth of backtraces
-        'backtraceDepth'=> 25,
+        'backtraceDepth'=> env('APM_BACKTRACEDEPTH', 25),
 
         // Add source code to span
-        'renderSource' => true,
+        'renderSource' => env('APM_RENDERSOURCE', true),
 
         'querylog' => [
             // Set to false to completely disable query logging, or to 'auto' if you would like to use the threshold feature.
