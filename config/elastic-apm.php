@@ -30,6 +30,9 @@ return [
 
         // API version of the apm agent you connect to
         'apmVersion'    => env('APM_APIVERSION', 'v1'),
+        
+        // Application environment
+        'environment'   => env('APM_ENVIRONMENT', 'development'),
 
         // Hostname of the system the agent is running on.
         'hostname'      => gethostname(),
