@@ -18,6 +18,7 @@ class Span
 
     private $name = 'Transaction Span';
     private $type = 'app.span';
+    private $context = [];
 
     private $start;
 
@@ -39,6 +40,16 @@ class Span
         $this->type = $type;
     }
 
+    public function setDbContext(SpanDbContext $context)
+    {
+        $this->context['db'] = $context->toArray();
+    }
+
+    public function setTags(SpanTagCollection $collection)
+    {
+        $this->context['tags'] = $collection->toArray();
+    }
+
     public function end()
     {
         $duration = round($this->timer->getElapsedInMilliseconds() - $this->start, 3);
@@ -47,6 +58,7 @@ class Span
             'type' => $this->type,
             'start' => $this->start,
             'duration' => $duration,
+            'context' => $this->context,
         ]);
     }
 }
