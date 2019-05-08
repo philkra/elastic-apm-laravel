@@ -14,8 +14,10 @@ return [
 
     'env' => [
         // whitelist environment variables OR send everything
-        'env' => ['DOCUMENT_ROOT', 'REMOTE_ADDR']
+        'env' => ['DOCUMENT_ROOT', 'REMOTE_ADDR'],
         //'env' => []
+        // Application environment
+        'environment'   => env('APM_ENVIRONMENT', 'development'),
     ],
 
     // GuzzleHttp\Client options (http://docs.guzzlephp.org/en/stable/request-options.html#request-options)
