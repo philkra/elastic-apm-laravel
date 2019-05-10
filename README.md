@@ -27,6 +27,26 @@ $app->middleware([
 ]);
 ```
 
+## Spans
+### Laravel
+A Transaction object is made available via the dependency container and can be used to start a
+new span at any point in the application. The Span will automatically add itself to the Transaction
+when it is ended.
+
+```php
+// Use any normal Laravel method of resolving the dependency
+$transaction = app(\PhilKra\ElasticApmLaravel\Apm\Transaction::class);
+
+$span = $transaction->startNewSpan('My Span', 'app.component_name');
+
+// do some stuff
+
+$span->end();
+```
+### Lumen
+
+pending
+
 ## Error/Exception Handling
 
 ### Laravel
@@ -53,17 +73,19 @@ not tested yet.
 
 The following environment variables are supported in the default configuration:
 
-| Variable         | Description |
-|------------------|-------------|
-|APM_ACTIVE        | `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data. |
-|APM_APPNAME       | Name of the app as it will appear in APM. |
-|APM_APPVERSION    | Version of the app as it will appear in APM. |
-|APM_SERVERURL     | URL to the APM intake service. |
-|APM_SECRETTOKEN   | Secret token, if required. |
-|APM_APIVERSION    | APM API version, defaults to `v1` (only v1 is supported at this time). |
-|APM_USEROUTEURI   | `true` or `false` defaults to `false`. The default behavior is to record the URL as sent in the request. This can result in excessive unique entries in APM. Set to `true` to have the agent use the route URL instead. |
-|APM_QUERYLOG      | `true` or `false` defaults to 'true'. Set to `false` to completely disable query logging, or to `auto` if you would like to use the threshold feature. |
-|APM_THRESHOLD     | Query threshold in milliseconds, defaults to `200`. If a query takes longer then 200ms, we enable the query log. Make sure you set `APM_QUERYLOG=auto`. |
+| Variable          | Description |
+|-------------------|-------------|
+|APM_ACTIVE         | `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data. |
+|APM_APPNAME        | Name of the app as it will appear in APM. |
+|APM_APPVERSION     | Version of the app as it will appear in APM. |
+|APM_SERVERURL      | URL to the APM intake service. |
+|APM_SECRETTOKEN    | Secret token, if required. |
+|APM_APIVERSION     | APM API version, defaults to `v1` (only v1 is supported at this time). |
+|APM_USEROUTEURI    | `true` or `false` defaults to `false`. The default behavior is to record the URL as sent in the request. This can result in excessive unique entries in APM. Set to `true` to have the agent use the route URL instead. |
+|APM_QUERYLOG       | `true` or `false` defaults to 'true'. Set to `false` to completely disable query logging, or to `auto` if you would like to use the threshold feature. |
+|APM_THRESHOLD      | Query threshold in milliseconds, defaults to `200`. If a query takes longer then 200ms, we enable the query log. Make sure you set `APM_QUERYLOG=auto`. |
+|APM_BACKTRACEDEPTH | Defaults to `25`. Depth of backtrace in query span. |
+|APM_RENDERSOURCE   | Defaults to `true`. Include source code in query span. |
 
 You may also publish the `elastic-apm.php` configuration file to change additional settings:
 

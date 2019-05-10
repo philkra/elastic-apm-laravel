@@ -6,6 +6,8 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
 use PhilKra\Agent;
+use PhilKra\ElasticApmLaravel\Apm\SpanCollection;
+use PhilKra\ElasticApmLaravel\Apm\Transaction;
 use PhilKra\ElasticApmLaravel\Contracts\VersionResolver;
 use PhilKra\Helper\Timer;
 
@@ -13,8 +15,6 @@ class ElasticApmServiceProvider extends ServiceProvider
 {
     /** @var float */
     private $startTime;
-    /** @var Timer */
-    private $timer;
     /** @var string  */
     private $sourceConfigPath = __DIR__ . '/../../config/elastic-apm.php';
 
@@ -68,12 +68,17 @@ class ElasticApmServiceProvider extends ServiceProvider
         });
 
         $this->startTime = $this->app['request']->server('REQUEST_TIME_FLOAT') ?? microtime(true);
-        $this->timer = new Timer($this->startTime);
+        $timer = new Timer($this->startTime);
 
-        $this->app->instance(Timer::class, $this->timer);
+        $collection = new SpanCollection();
+
+        $this->app->instance(Transaction::class, new Transaction($collection, $timer));
+
+        $this->app->instance(Timer::class, $timer);
 
         $this->app->alias(Agent::class, 'elastic-apm');
-        $this->app->instance('query-log', collect([]));
+        $this->app->instance('query-log', $collection);
+
     }
 
     /**
