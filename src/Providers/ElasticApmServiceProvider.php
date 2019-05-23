@@ -5,6 +5,9 @@ namespace PhilKra\ElasticApmLaravel\Providers;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Queue\Events\JobProcessing;
 use PhilKra\Agent;
 use PhilKra\ElasticApmLaravel\Apm\SpanCollection;
 use PhilKra\ElasticApmLaravel\Apm\Transaction;
@@ -31,6 +34,10 @@ class ElasticApmServiceProvider extends ServiceProvider
             ], 'config');
         }
 
+        if (config('elastic-apm.active') === true ) {
+            $this->listenForCommands();
+            $this->listenForJobs();
+        }
         if (config('elastic-apm.active') === true && config('elastic-apm.spans.querylog.enabled') !== false) {
             $this->listenForQueries();
         }
@@ -198,6 +205,86 @@ class ElasticApmServiceProvider extends ServiceProvider
             ];
 
             app('query-log')->push($query);
+        });
+    }
+
+    protected function getCmdTransName($command)
+    {
+        return $command->command ? ('artisan ' . $command->command) : 'artisan help';
+    }
+
+    protected function getJobTransName($job)
+    {
+        return $job->job ? ($job->connectionName.'-job ' . json_decode($job->job->getRawBody())->displayName) : 'job';
+    }
+
+    protected function listenForCommands()
+    {
+        $this->app->events->listen(\Illuminate\Console\Events\CommandStarting::class, function ($commandStarting) {
+
+            app(Agent::class)->startTransaction(
+                $this->getCmdTransName($commandStarting)
+            );
+        });
+
+        $this->app->events->listen(\Illuminate\Console\Events\CommandFinished::class, function ($commandFinished) {
+
+            $agent = app(Agent::class);
+            $transaction = $agent->getTransaction(
+                $this->getCmdTransName($commandFinished)
+            );
+            $transaction->setResponse([
+                'finished' => true,
+                'status_code' => $commandFinished->exitCode,
+            ]);
+
+            $transaction->setUserContext([
+                'id' => getmyuid(),
+                'username' => get_current_user(),
+            ]);
+
+            $transaction->setMeta([
+                'result' => $commandFinished->exitCode,
+                'type' => 'COMMAND'
+            ]);
+
+            $transaction->setSpans(app('query-log')->toArray());
+
+            $transaction->stop();
+            $agent->send();
+        });
+    }
+
+    protected function listenForJobs()
+    {
+        $this->app->queue->before(function (JobProcessing $job) {
+            app(Agent::class)->startTransaction(
+                $this->getJobTransName($job)
+            );
+        });
+
+        $this->app->queue->after(function (JobProcessed $job) {
+            $agent = app(Agent::class);
+            $transaction = $agent->getTransaction(
+                $this->getJobTransName($job)
+            );
+            $transaction->setUserContext([
+                'id' => getmyuid(),
+                'username' => get_current_user(),
+            ]);
+            $transaction->setMeta([
+                'type' => 'JOB'
+            ]);
+            $transaction->setSpans(app('query-log')->toArray());
+
+            $transaction->stop();
+            $agent->send();
+        });
+
+        $this->app->queue->failing(function (JobFailed $job) {
+            $agent = app(Agent::class);
+            $agent->captureThrowable(new \Exception('failed job'));
+            $agent->send();
         });
     }
 }
