@@ -27,6 +27,15 @@ $app->middleware([
 ]);
 ```
 
+## Service Provider
+### Laravel
+No need to register service provider manually. It is registered automatically by [package discovery](https://laravel.com/docs/5.6/packages#package-discovery).
+### Lumen
+In `bootstrap/app.php` register `\PhilKra\ElasticApmLaravel\Providers\ElasticApmServiceProvider::class` as service provider:
+```php
+$app->register(\PhilKra\ElasticApmLaravel\Providers\ElasticApmServiceProvider::class);
+```
+
 ## Spans
 ### Laravel
 A Transaction object is made available via the dependency container and can be used to start a
