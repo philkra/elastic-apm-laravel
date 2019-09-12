@@ -11,7 +11,7 @@
    "description":"A package to integrate Elastic APM into Laravel",
    "license":"MIT",
    "require":{  
-      "php":">= 7.0",
+      "php":">= 7.2",
       "illuminate/database":"^6.0",
       "illuminate/http":"^6.0",
       "illuminate/routing":"^6.0",
