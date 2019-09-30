@@ -5,6 +5,8 @@ namespace PhilKra\ElasticApmLaravel\Providers;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 use PhilKra\Agent;
 use PhilKra\ElasticApmLaravel\Apm\SpanCollection;
 use PhilKra\ElasticApmLaravel\Apm\Transaction;
@@ -102,7 +104,7 @@ class ElasticApmServiceProvider extends ServiceProvider
     protected function stripVendorTraces(Collection $stackTrace): Collection
     {
         return collect($stackTrace)->filter(function ($trace) {
-            return !starts_with(array_get($trace, 'file'), [
+            return !Str::startsWith((Arr::get($trace, 'file'), [
                 base_path() . '/vendor',
             ]);
         });
@@ -118,29 +120,29 @@ class ElasticApmServiceProvider extends ServiceProvider
             return collect([]);
         }
 
-        if (empty(array_get($stackTrace, 'file'))) {
+        if (empty(Arr::get($stackTrace, 'file'))) {
             return collect([]);
         }
 
-        $fileLines = file(array_get($stackTrace, 'file'));
+        $fileLines = file(Arr::get($stackTrace, 'file'));
         return collect($fileLines)->filter(function ($code, $line) use ($stackTrace) {
             //file starts counting from 0, debug_stacktrace from 1
-            $stackTraceLine = array_get($stackTrace, 'line') - 1;
+            $stackTraceLine = Arr::get($stackTrace, 'line') - 1;
 
             $lineStart = $stackTraceLine - 5;
             $lineStop = $stackTraceLine + 5;
 
             return $line >= $lineStart && $line <= $lineStop;
         })->groupBy(function ($code, $line) use ($stackTrace) {
-            if ($line < array_get($stackTrace, 'line')) {
+            if ($line < Arr::get($stackTrace, 'line')) {
                 return 'pre_context';
             }
 
-            if ($line == array_get($stackTrace, 'line')) {
+            if ($line == Arr::get($stackTrace, 'line')) {
                 return 'context_line';
             }
 
-            if ($line > array_get($stackTrace, 'line')) {
+            if ($line > Arr::get($stackTrace, 'line')) {
                 return 'post_context';
             }
 
@@ -167,11 +169,11 @@ class ElasticApmServiceProvider extends ServiceProvider
                 $sourceCode = $this->getSourceCode($trace);
 
                 return [
-                    'function' => array_get($trace, 'function') . array_get($trace, 'type') . array_get($trace,
+                    'function' => Arr::get($trace, 'function') . Arr::get($trace, 'type') . Arr::get($trace,
                             'function'),
-                    'abs_path' => array_get($trace, 'file'),
-                    'filename' => basename(array_get($trace, 'file')),
-                    'lineno' => array_get($trace, 'line', 0),
+                    'abs_path' => Arr::get($trace, 'file'),
+                    'filename' => basename(Arr::get($trace, 'file')),
+                    'lineno' => Arr::get($trace, 'line', 0),
                     'library_frame' => false,
                     'vars' => $vars ?? null,
                     'pre_context' => optional($sourceCode->get('pre_context'))->toArray(),
