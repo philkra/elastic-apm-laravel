@@ -104,7 +104,7 @@ class ElasticApmServiceProvider extends ServiceProvider
     protected function stripVendorTraces(Collection $stackTrace): Collection
     {
         return collect($stackTrace)->filter(function ($trace) {
-            return !Str::startsWith((Arr::get($trace, 'file'), [
+            return !Str::startsWith((Arr::get($trace, 'file')), [
                 base_path() . '/vendor',
             ]);
         });
