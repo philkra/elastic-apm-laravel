@@ -192,7 +192,7 @@ class ElasticApmServiceProvider extends ServiceProvider
                 'context' => [
                     'db' => [
                         'instance' => $query->connection->getDatabaseName(),
-                        'statement' => $query->sql,
+                        'statement' => (string) $query->sql,
                         'type' => 'sql',
                         'user' => $query->connection->getConfig('username'),
                     ],
