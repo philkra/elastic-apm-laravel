@@ -12,10 +12,10 @@
    "license":"MIT",
    "require":{  
       "php":">= 7.2",
-      "illuminate/database":"^6.0",
-      "illuminate/http":"^6.0",
-      "illuminate/routing":"^6.0",
-      "illuminate/support":"^6.0",
+      "illuminate/database":"5.5.x|5.6.x|5.7.x|5.8.x",
+      "illuminate/http":"5.5.x|5.6.x|5.7.x|5.8.x",
+      "illuminate/routing":"5.5.x|5.6.x|5.7.x|5.8.x",
+      "illuminate/support":"5.5.x|5.6.x|5.7.x|5.8.x",
       "philkra/elastic-apm-php-agent":"7.0.0-rc3",
       "ramsey/uuid":"^3.0"
    },
