@@ -1,6 +1,9 @@
-# PHP Elastic APM for Laravel & Lumen
 
-**IMPORTANT** Looking for a maintainer/owner. If you want to take over the project, please open an issue [here](https://github.com/philkra/elastic-apm-laravel/issues/new).
+⚠️ **WARNING:** This project is no longer maintained! The official [Elastic PHP APM agent](https://github.com/elastic/apm-agent-php) has superseeded this project. A big, big thank you to every contributor!
+
+---
+
+# PHP Elastic APM for Laravel & Lumen
 
 Laravel package of the https://github.com/philkra/elastic-apm-php-agent library, automatically handling transactions and errors/exceptions. If using `Illuminate\Support\Facades\Auth` the user Id added to the context.
 Tested with Laravel `5.6.*` and the philkra/elastic-apm-php-agent version `6.2.*`.
